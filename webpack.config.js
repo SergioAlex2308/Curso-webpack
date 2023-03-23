@@ -1,6 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
 	/* Aquí indicamos el elemento inicial de nuestra app.
@@ -13,7 +16,8 @@ module.exports = {
 		/* Aquí indicamos donde queremos que se guarde el proyecto */
 		path: path.resolve(__dirname, 'dist'),
 		/* Y colocamos el nombre del .js que va guardar */
-		filename: 'main.js',
+		filename: '[name].[contenthash].js',
+		assetModuleFilename: 'assets/fonts/[hash][ext][query]'
 	},
 
 	/* Vamos a indicar con extensiones vamos a trabajar en
@@ -21,7 +25,13 @@ module.exports = {
 	resolve: {
 		/* Importante pasar las extensiones con las que vamos a
 		trabajar, como .jsx (React.js)  */
-		extensions: ['.js']
+		extensions: ['.js'],
+		alias: {
+			'@utils' :path.resolve(__dirname, 'src/utils/'),
+			'@templates' :path.resolve(__dirname, 'src/templates/'),
+			'@styles' :path.resolve(__dirname, 'src/styles/'),
+			'@images' :path.resolve(__dirname, 'src/assets/images/'),
+		}
 	},
 	module: {
 		rules: [
@@ -39,6 +49,24 @@ module.exports = {
 					'css-loader',
 					'stylus-loader'
 				],
+			},
+			{
+				test: /\.png/,
+				type: 'asset/resource'
+			},
+			{
+				test: /\.(woff | woff2)$/,
+				use: {
+					loader: 'url-loader',
+					options: {
+						limit: 10000,
+						mimetype: "application/font-woff",
+						name: "[name].[contenthast].[ext]",
+						outputPath: "./assets/fonts/",
+						publicPath: "../assets/fonts/",
+						esModule: false,
+					}
+				}
 			}
 		]
 	},
@@ -48,6 +76,23 @@ module.exports = {
 			template: './public/index.html',
 			filename: './index.html'
 		}),
-		new MiniCssExtractPlugin(),
-	]
+		new MiniCssExtractPlugin({
+			filename: 'assets/[name].[contenthash].css'
+		}),
+		new CopyPlugin({
+			patterns: [
+				{
+					from: path.resolve(__dirname, "src", "assets/images"),
+					to: "assets/images"
+				}
+			]
+		})
+	],
+	optimization: {
+		minimize: true,
+		minimizer: [
+			new CssMinimizerPlugin(),
+			new TerserPlugin(),
+		]
+	}
 }
