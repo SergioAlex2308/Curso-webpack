@@ -2,10 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
-const { CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
 	/* Aquí indicamos el elemento inicial de nuestra app.
@@ -21,6 +18,9 @@ module.exports = {
 		filename: '[name].[contenthash].js',
 		assetModuleFilename: 'assets/fonts/[hash][ext][query]'
 	},
+	/* Activar el modo desarrollo del archivo */
+	mode: 'development',
+	watch: true,
 
 	/* Vamos a indicar con extensiones vamos a trabajar en
 	este proyecto */
@@ -89,14 +89,6 @@ module.exports = {
 				}
 			]
 		}),
-		new Dotenv(),
-		new CleanWebpackPlugin()
+		new Dotenv()
 	],
-	optimization: {
-		minimize: true,
-		minimizer: [
-			new CssMinimizerPlugin(),
-			new TerserPlugin(),
-		]
-	}
 }
